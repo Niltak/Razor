@@ -132,6 +132,7 @@ namespace Assistant.Scripts
             
             Interpreter.RegisterCommandHandler("poplist", PopList);
             Interpreter.RegisterCommandHandler("pushlist", PushList);
+            Interpreter.RegisterCommandHandler("pushlistdelimiter", PushListDelimiter);
             Interpreter.RegisterCommandHandler("removelist", RemoveList);
             Interpreter.RegisterCommandHandler("createlist", CreateList);
             Interpreter.RegisterCommandHandler("clearlist", ClearList);
@@ -187,6 +188,32 @@ namespace Assistant.Scripts
             }
 
             Interpreter.PushList(args[0].AsString(), new Variable(args[1].AsString()), front, force);
+
+            return true;
+        }
+
+        private static bool PushListDelimiter(string command, Variable[] args, bool quiet, bool force)
+        {
+            if (args.Length < 3 || args.Length > 4)
+                throw new RunTimeError("Usage: pushlistdelimiter ('list name') ('value to split') ('delimiter') ['front'/'back']");
+
+            bool front = false;
+            if (args.Length == 4)
+            {
+                if (args[3].AsString() == "front")
+                    front = true;
+            }
+
+            string listName = args[0].AsString();
+            string valueToSplit = args[1].AsString();
+            string delimiter = args[2].AsString();
+
+            string[] elements = valueToSplit.Split(new string[] { delimiter }, StringSplitOptions.None);
+
+            foreach (string element in elements)
+            {
+                Interpreter.PushList(listName, new Variable(element), front, force);
+            }
 
             return true;
         }
